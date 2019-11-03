@@ -12,9 +12,24 @@ import cv2
 #using Keras, train a CNN model on the Chars74K dataset, to achieve number recognition
 #puzzle solving, using the recursive backtracking algorithm
 
-frame = 
 
+cap = cv2.VideoCapture(0)
 
+while True:
+    ret, frame = cap.read()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    """
+    agt = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C)
+    """
+    cv2.imshow('gray', gray)
+
+    quit = cv2.waitKey(5) & 0xFF
+    if quit == 27:
+        break
+    
+cv2.destroyAllWindows()
+cap.release()
+"""
 array = [
         [0,0,0,0,0,9,6,3,0],
         [0,4,0,6,0,0,8,2,0],
@@ -73,7 +88,8 @@ def square_collision(sudoku, num, row, col):
 
 
 def valid_square(sudoku, num, row, col):
-    return not row_collision(sudoku, num, row) and not column_collision(sudoku, num, col) and not square_collision(sudoku, num, row - row % 3, col - col % 3)
+    return not row_collision(sudoku, num, row) and not column_collision(sudoku, num, col)\
+    and not square_collision(sudoku, num, row - row % 3, col - col % 3)
 
 def solve(sudoku):
 
@@ -98,3 +114,4 @@ def solve(sudoku):
 
 solve(array)
 print_table(array)
+"""
