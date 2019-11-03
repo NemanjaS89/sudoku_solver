@@ -18,10 +18,10 @@ cap = cv2.VideoCapture(0)
 while True:
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    """
-    agt = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C)
-    """
-    cv2.imshow('gray', gray)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    agt = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 5)
+    
+    cv2.imshow('agt', agt)
 
     quit = cv2.waitKey(5) & 0xFF
     if quit == 27:
