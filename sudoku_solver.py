@@ -1,8 +1,18 @@
 import cv2
 
 
+#take webcam stream as an input
+#convert the stream to grayscale
+#apply gaussian blur
+#apply adaptive gaussian thresholding
+#use Hough line transform to detect and draw over the straight lines
+#use linear segments to find the contours
+#select the contour with the biggest area or an approximate encompasing polygon
+#keep only the selected part of the image and apply perspective transformation
+#using Keras, train a CNN model on the Chars74K dataset, to achieve number recognition
+#puzzle solving, using the recursive backtracking algorithm
 
-
+frame = 
 
 
 array = [
