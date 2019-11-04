@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 
 #take webcam stream as an input
@@ -20,8 +21,21 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
     agt = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 5)
+    edges = cv2.Canny(agt, 50, 150, apertureSize = 3)
+    lines = cv2.HoughLines(edges, 1, np.pi/180, 5)
+    for rho,theta in lines[0]:
+        a = np.cos(theta)
+        b = np.sin(theta)
+        x0 = a * rho
+        y0 = b * rho
+        x1 = int(x0 + 1000*(-b))
+        y1 = int(y0 + 1000*(a))
+        x2 = int(x0 - 1000*(-b))
+        y2 = int(y0 - 1000*(a))
+        
+        cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
     
-    cv2.imshow('agt', agt)
+    cv2.imshow('frame', frame)
 
     quit = cv2.waitKey(5) & 0xFF
     if quit == 27:
