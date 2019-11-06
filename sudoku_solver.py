@@ -20,27 +20,32 @@ while True:
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    agt = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 5)
-    edges = cv2.Canny(agt, 50, 150, apertureSize = 3)
-    lines = cv2.HoughLines(edges, 1, np.pi/180, 5)
-    for rho,theta in lines[0]:
-        a = np.cos(theta)
-        b = np.sin(theta)
-        x0 = a * rho
-        y0 = b * rho
-        x1 = int(x0 + 1000*(-b))
-        y1 = int(y0 + 1000*(a))
-        x2 = int(x0 - 1000*(-b))
-        y2 = int(y0 - 1000*(a))
-        
-        cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+    agt = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 5)
+    #edges = cv2.Canny(agt, 50, 150, apertureSize = 3)
     
-    cv2.imshow('frame', frame)
+    agt_prepared = cv2.cvtColor(agt, cv2.COLOR_GRAY2BGR)
+    lines = cv2.HoughLinesP(agt, 1, np.pi/180, 150, 100, 10)
+    
+    if lines is not None:
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+            cv2.line(agt_prepared, (x1, y1), (x2, y2), (0, 255, 0), 3)
+            
+    #cv2.createTrackbar('')
+    """
+    _, contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours_draw = cv2.drawContours(frame, contours, -1, (0, 255, 0), 2)
 
-    quit = cv2.waitKey(5) & 0xFF
+    """
+    
+    
+    cv2.imshow('agt_prepared', agt_prepared)
+    
+    quit = cv2.waitKey(1)
     if quit == 27:
         break
     
+
 cv2.destroyAllWindows()
 cap.release()
 """
