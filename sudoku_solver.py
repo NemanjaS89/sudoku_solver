@@ -20,8 +20,13 @@ def on_change(self):
     pass
 
 cv2.namedWindow('trackbars')
-cv2.createTrackbar('lines threshold', 'trackbars', 0, 255, on_change)
+cv2.createTrackbar('lines_threshold', 'trackbars', 0, 255, on_change)
+cv2.createTrackbar('lines_min_length', 'trackbars', 0, 255, on_change)
+cv2.createTrackbar('lines_max_gap', 'trackbars', 0, 255, on_change)
+
 hough_thresh = cv2.getTrackbarPos('hough_thresh', 'trackbars')
+min_length = cv2.getTrackbarPos('min_length', 'trackbars')
+max_gap = cv2.getTrackbarPos('max_gap', 'trackbars')
 
 while True:
     ret, frame = cap.read()
@@ -34,7 +39,7 @@ while True:
     #edges = cv2.Canny(agt, 50, 150, apertureSize = 3)
     agt_prepared = cv2.cvtColor(agt, cv2.COLOR_GRAY2BGR)
     
-    lines = cv2.HoughLinesP(agt, 1, np.pi/180, hough_thresh, 50, 5)
+    lines = cv2.HoughLinesP(agt, 1, np.pi/180, hough_thresh, min_length, max_gap)
     
     if lines is not None:
         for line in lines:
