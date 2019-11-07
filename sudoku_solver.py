@@ -16,21 +16,31 @@ import numpy as np
 
 cap = cv2.VideoCapture(0)
 
+def on_change(self):
+    pass
+
+cv2.namedWindow('trackbars')
+cv2.createTrackbar('lines threshold', 'trackbars', 0, 255, on_change)
+hough_thresh = cv2.getTrackbarPos('hough_thresh', 'trackbars')
+
 while True:
     ret, frame = cap.read()
+    
+    
+    
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
     agt = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 5)
     #edges = cv2.Canny(agt, 50, 150, apertureSize = 3)
     agt_prepared = cv2.cvtColor(agt, cv2.COLOR_GRAY2BGR)
     
-    lines = cv2.HoughLinesP(agt, 1, np.pi/180, 80, 50, 5)
+    lines = cv2.HoughLinesP(agt, 1, np.pi/180, hough_thresh, 50, 5)
     
     if lines is not None:
         for line in lines:
             x1, y1, x2, y2 = line[0]
             cv2.line(agt_prepared, (x1, y1), (x2, y2), (0, 255, 0), 1)
-    
+    """
     _, contours, hierarchy = cv2.findContours(agt, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     for cnt in contours:
@@ -39,10 +49,12 @@ while True:
     
     x = table.ravel()[0]
     y = table.ravel()[1]
-    cv2.putText(agt_prepared, 'TACKA', (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
+    cv2.putText(agt, 'TACKA', (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
     print(x)
     print(y)
-    """
+    
+    
+    
     cnt = contours[0]
     max_area = cv2.contourArea(cnt)
     
@@ -61,9 +73,7 @@ while True:
             print(sudoku3, str(3))
             print(sudoku4, str(4))
             
-    """
     
-    """
     pts_1 = np.float32([[sudoku1], [sudoku2], [sudoku3], [sudoku4]])
     pts_2 = np.float32([[0, 0], [400, 0], [0, 600], [400, 600]])
     
