@@ -16,18 +16,6 @@ import numpy as np
 
 cap = cv2.VideoCapture(0)
 
-def on_change(self):
-    pass
-
-cv2.namedWindow('trackbars')
-cv2.createTrackbar('lines_threshold', 'trackbars', 0, 255, on_change)
-cv2.createTrackbar('lines_min_length', 'trackbars', 0, 255, on_change)
-cv2.createTrackbar('lines_max_gap', 'trackbars', 0, 255, on_change)
-
-hough_thresh = cv2.getTrackbarPos('hough_thresh', 'trackbars')
-min_length = cv2.getTrackbarPos('min_length', 'trackbars')
-max_gap = cv2.getTrackbarPos('max_gap', 'trackbars')
-
 while True:
     ret, frame = cap.read()
     
@@ -36,62 +24,18 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
     agt = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 5)
-    #edges = cv2.Canny(agt, 50, 150, apertureSize = 3)
-    agt_prepared = cv2.cvtColor(agt, cv2.COLOR_GRAY2BGR)
-    
-    lines = cv2.HoughLinesP(agt, 1, np.pi/180, hough_thresh, min_length, max_gap)
-    
+    agt_prepared = cv2.cvtColor(agt, cv2.COLOR_GRAY2RGB)
+
+    lines = cv2.HoughLinesP(agt, 1, np.pi/180, 0, 50, 5)
     if lines is not None:
         for line in lines:
             x1, y1, x2, y2 = line[0]
             cv2.line(agt_prepared, (x1, y1), (x2, y2), (0, 255, 0), 1)
-    """
-    _, contours, hierarchy = cv2.findContours(agt, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    for cnt in contours:
-        table = cv2.approxPolyDP(cnt, 0.05 * cv2.arcLength(cnt, True), True)
-        contours_draw = cv2.drawContours(agt_prepared, [table], 0, (0, 0, 255), 4)
-    
-    x = table.ravel()[0]
-    y = table.ravel()[1]
-    cv2.putText(agt, 'TACKA', (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
-    print(x)
-    print(y)
-    
-    
-    
-    cnt = contours[0]
-    max_area = cv2.contourArea(cnt)
-    
-    sudoku1 = [0, 0]
-    sudoku2 = [0, 0]
-    sudoku3 = [0, 0]
-    sudoku4 = [0, 0]
-    
-    for cont in contours:
-        if cv2.contourArea(cont) > max_area:
-            cnt = cont
-            max_area = cv2.contourArea(cont)
-            sudoku2, sudoku3, sudoku1, sudoku4 = 
-            print(sudoku1, str(1))
-            print(sudoku2, str(2))
-            print(sudoku3, str(3))
-            print(sudoku4, str(4))
-            
-    
-    pts_1 = np.float32([[sudoku1], [sudoku2], [sudoku3], [sudoku4]])
-    pts_2 = np.float32([[0, 0], [400, 0], [0, 600], [400, 600]])
-    
-    
-    pers = cv2.getPerspectiveTransform(pts_1, pts_2)
-    warped = cv2.warpPerspective(agt_prepared, pers, (400, 400))
-    """
     cv2.imshow('agt_prepared', agt_prepared)
     
     quit = cv2.waitKey(1)
     if quit == 27:
         break
-    
 
 cv2.destroyAllWindows()
 cap.release()
