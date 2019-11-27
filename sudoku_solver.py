@@ -71,6 +71,18 @@ while True:
 
 cv2.destroyAllWindows()
 cap.release()
+
+if key&0XFF == ord("q"):
+    exit()
+
+warped = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
+winX = int(warped.shape[1]/9.0)
+winY = int(warped.shape[0]/9.0)
+
+model = load_model(args["model"])
+
+labels = []
+centers = []
 """
 array = [
         [0,0,0,0,0,9,6,3,0],
