@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from imutils.perspective import four_point_transform, order_points
-from skimage.filters import threshold_adaptive
+from skimage import filters
 
 #take webcam stream as an input
 #convert the stream to grayscale
@@ -38,7 +38,7 @@ while True:
     """
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    agt = threshold_adaptive(blur,block_size=5,offset=1).astype("uint8")*255
+    agt = filters.threshold_local(blur,block_size=5,offset=1).astype("uint8")*255
 
     contours, _ = cv2.findContours(agt, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
@@ -72,17 +72,6 @@ while True:
 cv2.destroyAllWindows()
 cap.release()
 
-if key&0XFF == ord("q"):
-    exit()
-
-warped = cv2.cvtColor(warped,cv2.COLOR_BGR2GRAY)
-winX = int(warped.shape[1]/9.0)
-winY = int(warped.shape[0]/9.0)
-
-model = load_model(args["model"])
-
-labels = []
-centers = []
 """
 array = [
         [0,0,0,0,0,9,6,3,0],
