@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-from imutils.perspective import four_point_transform, order_points
-from skimage import filters
 
 #take webcam stream as an input
 #convert the stream to grayscale
@@ -17,61 +15,36 @@ from skimage import filters
 
 cap = cv2.VideoCapture(0)
 
-def nothing(x):
-    print(x)
-
-img = np.zeros((300, 512, 3), np.uint8)
-"""
-cv2.namedWindow('trackbars')
-
-cv2.createTrackbar('hough_thr', 'trackbars', 0, 255, nothing)
-cv2.createTrackbar('hough_min', 'trackbars', 0, 255, nothing)
-cv2.createTrackbar('hough_max', 'trackbars', 0, 255, nothing)
-"""
-
 while True:
     ret, frame = cap.read()
-    """
-    hough_thr = cv2.getTrackbarPos('hough_thr', 'trackbars')
-    hough_min = cv2.getTrackbarPos('hough_min', 'trackbars')
-    hough_max = cv2.getTrackbarPos('hough_max', 'trackbars')
-    """
+    
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    agt = filters.threshold_local(blur,block_size=5,offset=1).astype("uint8")*255
+    agt = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 17, 2)
 
     contours, _ = cv2.findContours(agt, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    mask = np.zeros(agt.shape, dtype='uint8')
-    square = contours[1]
-    clone = frame.copy()
-
-    arc = cv2.arcLength(square, closed=True)
-    poly = cv2.approxPolyDP(square, epsilon=0.02*arc, closed=True)
-
-    if len(poly) == 4:
-        cv2.drawContours(clone, [poly], -1, (0, 255, 0), 2)
-        warped = four_point_transform(frame, poly.reshape(-1, 2))
-        cv2.imshow('warped', warped)
-
-    cv2.imshow('contours', clone)
+    contours = sorted(contours, key = cv2.contourArea, reverse = True)[:5]
+    cv2.drawContours(frame, contours, -1, [0,255,0], 3)
+    """
+    for c in contours:
+        c_len = cv2.arcLength(c, True)
+        c = cv2.approxPolyDP(c, c_len * 0.02, True)
+        if len(c) == 4 and cv2.contourArea(c) > 1000:
+            
+    """
+    
+    
+    
     
 
-    """
-    lines = cv2.HoughLinesP(agt, 1, np.pi/180, hough_thr, hough_min, hough_max)
-    if lines is not None:
-        for line in lines:
-            x1, y1, x2, y2 = line[0]
-            cv2.line(agt_prepared, (x1, y1), (x2, y2), (0, 255, 0), 1)
+    cv2.imshow('frame', frame)
 
-    """
     quit = cv2.waitKey(1)
     if quit == 27:
         break
 
 cv2.destroyAllWindows()
 cap.release()
-
 """
 array = [
         [0,0,0,0,0,9,6,3,0],
