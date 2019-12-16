@@ -17,27 +17,47 @@ cap = cv2.VideoCapture(0)
 
 while True:
     ret, frame = cap.read()
+    x, y, _ = frame.shape
     
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    agt = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 17, 2)
+    agt = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 31, 2)
 
     contours, _ = cv2.findContours(agt, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key = cv2.contourArea, reverse = True)[:5]
-    cv2.drawContours(frame, contours, -1, [0,255,0], 3)
-    """
+    squares = []
+
     for c in contours:
         c_len = cv2.arcLength(c, True)
         c = cv2.approxPolyDP(c, c_len * 0.02, True)
-        if len(c) == 4 and cv2.contourArea(c) > 1000:
-            
-    """
+        if len(c) == 4 and cv2.contourArea(c) > 1100:
+            squares.append(c)    
     
+    cv2.drawContours(frame, squares, -1, [0,255,0], 3)
     
-    
-    
+    reference_pts = np.array([(0, 0), (x, 0), (0, y), (x, y)], np.float32)
 
+    try:
+        warp_pts = squares[0]
+        x = warp_pts[0][0]
+        print(x)
+    except:
+        print('no square')
+    
+    try:
+        matrix = cv2.getPerspectiveTransform(warp_pts, reference_pts)
+        warp = cv2.warpPerspective(frame, matrix, (480, 640))
+        cv2.imshow('warp', warp)
+    except:
+        pass
+    
+    warp_pts = squares[0]
+    x = warp_pts[0][0]
+    
+    
     cv2.imshow('frame', frame)
+    #cv2.imshow('warp', warp)
+    
 
     quit = cv2.waitKey(1)
     if quit == 27:
