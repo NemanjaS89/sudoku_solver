@@ -22,7 +22,7 @@ while True:
     
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    agt = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 45, 2)
+    agt = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 31, 2)
 
     #preprocess = cv2.bitwise_not(agt, agt)
     #kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]],np.uint8)
@@ -30,24 +30,25 @@ while True:
 
     contours, _ = cv2.findContours(agt, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key = cv2.contourArea, reverse = True)[:5]
-    square = contours[0]
+    squares = []
     
     for c in contours:
         c_len = cv2.arcLength(c, True)
         c = cv2.approxPolyDP(c, c_len * 0.02, True)
         if len(c) == 4 and cv2.contourArea(c) > 1100:
-            square = c    
-    
+            squares.append(c)    
+    """
     bottom_right, _ = max(enumerate([pt[0][0] + pt[0][1] for pt in square]), key=operator.itemgetter(1))
     top_left, _ = min(enumerate([pt[0][0] + pt[0][1] for pt in square]), key=operator.itemgetter(1))
     bottom_left, _ = min(enumerate([pt[0][0] - pt[0][1] for pt in square]), key=operator.itemgetter(1))
     top_right, _ = max(enumerate([pt[0][0] - pt[0][1] for pt in square]), key=operator.itemgetter(1))
 
     corners = [square[top_left][0], square[top_right][0], square[bottom_right][0], square[bottom_left][0]]
-
+    """
     
-    cv2.drawContours(frame, square, -1, [0,255,0], 3)
+    cv2.drawContours(frame, squares, -1, [0,255,0], 3)
     #cv2.drawContours(frame, corners, -1, [0,0,255], 3)
+    
     
     reference_pts = np.array([(0, 0), (x, 0), (0, y), (x, y)], np.float32)
     
