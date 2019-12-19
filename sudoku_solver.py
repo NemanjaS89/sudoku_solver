@@ -16,47 +16,53 @@ import operator
 
 cap = cv2.VideoCapture(0)
 
+def warp(frame, square):
+    bottom_right, _ = max(enumerate([pt[0][0] + pt[0][1] for pt in square]), key=operator.itemgetter(1))
+    top_left, _ = min(enumerate([pt[0][0] + pt[0][1] for pt in square]), key=operator.itemgetter(1))
+    bottom_left, _ = min(enumerate([pt[0][0] - pt[0][1] for pt in square]), key=operator.itemgetter(1))
+    top_right, _ = max(enumerate([pt[0][0] - pt[0][1] for pt in square]), key=operator.itemgetter(1))
+
+    reference_pts = np.array([(0, 0), (449, 0), (449, 449), (0, 449)], np.float32)
+    corners = [square[top_left][0], square[top_right][0], square[bottom_right][0], square[bottom_left][0]]
+
+    mask = cv2.getPerspectiveTransform(np.float32(corners), reference_pts)
+    return cv2.warpPerspective(frame, np.float32(mask), (450, 450))
+
+
+
 while True:
     ret, frame = cap.read()
     x, y, _ = frame.shape
     
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    agt = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 5, 2)
-
-    #preprocess = cv2.bitwise_not(agt, agt)
-    #kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]],np.uint8)
-    #dilate = cv2.dilate(preprocess, kernel)
-    
-    contours, _ = cv2.findContours(agt, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    contours = sorted(contours, key = cv2.contourArea, reverse = True)[:5]
+    blur = cv2.GaussianBlur(gray, (9, 9), 0)
+    agt = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+    """
+    preprocess = cv2.bitwise_not(agt, agt)
+    kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]],np.uint8)
+    dilate = cv2.dilate(preprocess, kernel)
+    """
+    contours, _ = cv2.findContours(agt, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key = cv2.contourArea, reverse = True)[:2]
     square = []
     
     for c in contours:
         c_len = cv2.arcLength(c, True)
         c = cv2.approxPolyDP(c, c_len * 0.02, True)
-        if len(c) == 4 and cv2.contourArea(c) > 1100:
+        if len(c) == 4 and cv2.contourArea(c) > 1200:
             square = c
-    
-    try:
-        bottom_right, _ = max(enumerate([pt[0][0] + pt[0][1] for pt in square]), key=operator.itemgetter(1))
-        top_left, _ = min(enumerate([pt[0][0] + pt[0][1] for pt in square]), key=operator.itemgetter(1))
-        bottom_left, _ = min(enumerate([pt[0][0] - pt[0][1] for pt in square]), key=operator.itemgetter(1))
-        top_right, _ = max(enumerate([pt[0][0] - pt[0][1] for pt in square]), key=operator.itemgetter(1))
 
-        corners = [square[top_left][0], square[top_right][0], square[bottom_right][0], square[bottom_left][0]]
-        print(corners)
+    cv2.drawContours(frame, square, -1, [0,255,0], 3)
+
+    try:
+        warped = warp(frame, square)
+        cv2.imshow('warped', warped)
     except:
         pass
     
-    cv2.drawContours(frame, square, -1, [0,255,0], 3)
-    
-    reference_pts = np.array([(0, 0), (x, 0), (0, y), (x, y)], np.float32)
-    
     cv2.imshow('frame', frame)
-    #cv2.imshow('warp', warp)
     
-
+    
     quit = cv2.waitKey(1)
     if quit == 27:
         break
