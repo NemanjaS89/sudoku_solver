@@ -56,6 +56,9 @@ while True:
 
     try:
         warped = warp(frame, square)
+        warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+        warped = cv2.GaussianBlur(warped, (9, 9), 0)
+        warped = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
         cv2.imshow('warped', warped)
     except:
         pass
