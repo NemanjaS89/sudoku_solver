@@ -2,6 +2,10 @@ import cv2
 import numpy as np
 import operator
 
+from keras.models import Sequential
+from keras.layers.core import Dense, Activation
+from keras.optimizers import SGD
+
 #take webcam stream as an input
 #convert the stream to grayscale
 #apply gaussian blur
@@ -37,12 +41,7 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (9, 9), 0)
     agt = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
-    """
-    preprocess = cv2.bitwise_not(agt, agt)
-    kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]],np.uint8)
-    dilate = cv2.dilate(preprocess, kernel)
-    """
-    contours, _ = cv2.findContours(agt, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv2.findContours(agt, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key = cv2.contourArea, reverse = True)[:2]
     square = []
     
@@ -60,8 +59,20 @@ while True:
         warped = cv2.GaussianBlur(warped, (9, 9), 0)
         warped = cv2.adaptiveThreshold(warped, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
         cv2.imshow('warped', warped)
+        i = 2
+        j = 2
+        y_1 = i * 50
+        x_1 = j * 50
+        y_2 = (i + 1) * 50
+        x_2 = (j + 1) * 50
+        field_i_j = warped[y_1:y_2, x_1:x_2]
+        field_i_j = field_i_j[5:45, 5:45]
+        cv2.imshow('field_i_j', field_i_j)
     except:
         pass
+
+    
+            
     
     cv2.imshow('frame', frame)
     
