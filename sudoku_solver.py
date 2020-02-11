@@ -7,6 +7,7 @@ from keras.models import Sequential
 from keras.datasets import mnist
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD
+import tensorflow as tf
 
 # take webcam stream as an input
 # convert the stream to grayscale
@@ -149,6 +150,8 @@ def display_result(outputs, alphabet):
         result.append(alphabet[winner(output)])
     return result
 
+new_model = tf.keras.models. load_model('sudoku_solver_model')
+
 while True:
     ret, frame = cap.read()
     x, y, _ = frame.shape
@@ -192,6 +195,8 @@ while True:
         test_inputs = prepare_for_ann(test_numbers)
         cv2.imshow('selected_test', selected_test)
         cv2.imshow('field_i_j', field_i_j)
+        prediction = new_model.predict([test_inputs])
+        print(np.argmax(prediction[0]))
     except:
         pass
 
