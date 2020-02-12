@@ -85,7 +85,7 @@ def select_roi(image_orig, image_bin):
         x, y, w, h = cv2.boundingRect(contour)
         area = cv2.contourArea(contour)
         if area > 100 and h < 100 and h > 10 and w > 20:
-            region = image_bin[y:y + h + 1, x:x + w + 1]
+            region = image_bin[y - 10 : y + h + 10, x - 10 : x + w + 10]
             regions_array.append([resize_region(region), (x, y, w, h)])
             cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
@@ -190,13 +190,25 @@ while True:
         field_i_j = cv2.resize(field_i_j, (80, 80), interpolation=cv2.INTER_NEAREST)
         malo_boje = cv2.cvtColor(field_i_j, cv2.COLOR_GRAY2BGR)
 
-        selected_test, test_numbers = select_roi(malo_boje, field_i_j)
-        display_image(selected_test)
-        test_inputs = prepare_for_ann(test_numbers)
-        cv2.imshow('selected_test', selected_test)
-        cv2.imshow('field_i_j', field_i_j)
-        prediction = new_model.predict([test_inputs])
-        print(np.argmax(prediction[0]))
+        cv2.imshow('malo_boje', malo_boje)
+
+        region = cv2.resize(field_i_j, (28, 28))
+        test = region.reshape(1, 1, 28, 28)
+
+        json_model = open('model.json', 'r')
+        loaded_model_json = json_model.read()
+        json_model.close()
+        loaded_model = tf.keras.models.model_from_json(loaded_model_json)
+
+        loaded_model.load_weights('model.h5')
+        loaded_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+                             metrics=['accuracy'])
+
+        prediction = loaded_model.predict(test)
+        result = np.argmax(prediction)
+        print(result)
+
+
     except:
         pass
 
