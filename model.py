@@ -1,6 +1,7 @@
 import keras
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import os
 
 
 mnist = tf.keras.datasets.mnist
@@ -21,7 +22,12 @@ model.add(tf.keras.layers.Dense(10, activation = tf.nn.softmax))
 
 model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy',
               metrics = ['accuracy'])
-model.fit(x_train, y_train, epochs = 4)
+model.fit(x_train, y_train, epochs = 3)
 val_loss, val_acc = model.evaluate(x_test, y_test)
 print(val_loss, val_acc)
-model.save('sudoku_solver_model')
+
+model_json = model.to_json()
+with open ('model_json', 'w') as json_file:
+    json_file.write(model_json)
+
+model.save_weights('model.h5')

@@ -150,7 +150,7 @@ def display_result(outputs, alphabet):
         result.append(alphabet[winner(output)])
     return result
 
-new_model = tf.keras.models. load_model('sudoku_solver_model')
+
 
 while True:
     ret, frame = cap.read()
