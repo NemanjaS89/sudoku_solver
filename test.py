@@ -9,14 +9,14 @@ import os
 while True:
     img = cv2.imread('cetri.png')
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, bin = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+    _, bin = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
     _, contours, _, = cv2.findContours(bin, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(img, contours, 0, (0, 255, 0), 2)
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         area = cv2.contourArea(contour)
         if area > 50 and h < 120 and w < 120:
-            region = bin[y:y + h + 1, x:x + w + 1]
+            region = bin[y - 20 : y + h + 20, x - 20 : x + w + 20]
             cv2.imshow('region', region)
 
     region = cv2.resize(region, (28, 28))
